@@ -2,9 +2,6 @@
 #include <ncurses.h>
 #include <stdbool.h>
 
-#define CIRCLE 1
-#define CROSS 2
-
 #define ARR_UP 'A'
 #define ARR_DOWN 'B'
 #define ARR_RIGHT 'C'
@@ -50,6 +47,10 @@ char return_player_char(Player player) {
         case Unplayed:
             return ' ';
             break;
+       default:
+            // -Wall keeps bugging me, even though this shouldn't happen.
+            return '\0';
+            break;
     }
 }
 
@@ -92,24 +93,16 @@ void jogar(Player table[3][3], Player player) {
 			getch();
 			switch(getch()) {
 				case ARR_UP:
-					if (vert > 0) {
-						vert--;
-					}
+					vert = (vert > 0) ? vert-1 : 2;
 					break;
 				case ARR_DOWN:
-					if (vert < 2) {
-						vert++;
-					}
+					vert = (vert < 2) ? vert + 1 : 0;
 					break;
 				case ARR_LEFT:
-					if (hori > 0) {
-						hori--;
-					}
+					hori = (hori > 0) ? hori-1 : 2;
 					break;
 				case ARR_RIGHT:
-					if(hori < 2) {
-						hori++;
-					}
+					hori = (hori < 2) ? hori+1 : 0;
 					break;
 			}
 		}
@@ -131,29 +124,20 @@ void jogar(Player table[3][3], Player player) {
 
 int main() {
 	Player table[3][3] = { Unplayed };	
-	
-	Player um = Circle;
-	Player dois = Cross;
+
+    Player current_players[2] = { Circle, Cross };
 
 	initscr();
     start_color();
     init_pair(1, COLOR_RED, COLOR_BLACK);
 
 
-	while(1) {
+	for (int i = 0; ; i = (i + 1) % 2) {
 		print_table(table);
-		jogar(table, um);
-        if (has_won(table, um)) {
+		jogar(table, current_players[i]);
+        if (has_won(table, current_players[i])) {
             endwin();
-            printf("Jogador %c ganhou!\n", return_player_char(um));
-            return 0;
-        }
-
-        print_table(table);
-		jogar(table, dois);
-        if (has_won(table, dois)) {
-            endwin();
-            printf("Jogador %c ganhou!\n", return_player_char(dois));
+            printf("Player %c has won!\n", return_player_char(current_players[i]));
             return 0;
         }
     }
